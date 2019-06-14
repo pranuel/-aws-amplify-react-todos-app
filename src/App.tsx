@@ -9,6 +9,8 @@ import { listTodos } from './graphql/queries';
 import { Todo } from './todo.model';
 import { GraphQLResult } from '@aws-amplify/api/lib/types';
 import Observable from 'zen-observable';
+import { List, Form, Button, Message, Header, Icon, Container, Segment, Divider } from 'semantic-ui-react'
+import 'semantic-ui-css/semantic.min.css'
 
 Amplify.configure(awsconfig);
 
@@ -16,6 +18,7 @@ interface AppState {
   allTodos: Todo[];
   newTodoName: string;
   newTodoDescription?: string;
+  areTodosLoading: boolean
 }
 
 class App extends React.Component<{}, AppState> {
@@ -24,7 +27,8 @@ class App extends React.Component<{}, AppState> {
     super(props);
     this.state = {
       allTodos: [],
-      newTodoName: ''
+      newTodoName: '',
+      areTodosLoading: false
     };
     this.handleSubmit = this.handleSubmit.bind(this);
   }
@@ -35,6 +39,7 @@ class App extends React.Component<{}, AppState> {
 
   async handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     await this.createTodo();
+    this.resetFormInputs();
     event.preventDefault();
   }
 
@@ -51,13 +56,22 @@ class App extends React.Component<{}, AppState> {
     await this.listTodos();
   }
 
+  private resetFormInputs() {
+    this.setState({
+      newTodoDescription: '',
+      newTodoName: ''
+    });
+  }
+
   isGraphQLResult(result: GraphQLResult | Observable<object>): result is GraphQLResult {
     // this crazy stuff was taken from here: https://www.typescriptlang.org/docs/handbook/advanced-types.html
     return (result as GraphQLResult).data !== undefined;
   }
 
   listTodos = async () => {
+    this.setState({ areTodosLoading: true });
     const allTodosResult = await API.graphql(graphqlOperation(listTodos));
+    this.setState({ areTodosLoading: false });
     if (this.isGraphQLResult(allTodosResult)) {
       const listTodosQuery = allTodosResult.data as ListTodosQuery;
       if (!!listTodosQuery.listTodos) {
@@ -68,40 +82,57 @@ class App extends React.Component<{}, AppState> {
   }
 
   render() {
-    const { allTodos, newTodoDescription, newTodoName } = this.state;
+    const { allTodos, newTodoDescription, newTodoName, areTodosLoading } = this.state;
     return (
-      <div className="App">
-        <form onSubmit={this.handleSubmit}>
-          <label>
-            Name:
-          <input type="text" value={newTodoName} onChange={event => this.setState({ newTodoName: event.target.value })} />
-          </label>
-          <label>
-            Description (optional):
-          <input type="text" value={newTodoDescription || ''} onChange={event => this.setState({ newTodoDescription: event.target.value })} />
-          </label>
-          <input type="submit" value="Submit" />
-        </form>
-        <h1>Todos:</h1>
-        {
-          allTodos.length < 1 ?
-            (
-              <p>No todos exist...</p>
-            )
-            :
-            (
-              <ul>
-                {allTodos.map(todo => (
-                  <li>
-                    <p>Id: {todo.id}</p>
-                    <p>Name: {todo.name}</p>
-                    <p>Description: {todo.description || '/'}</p>
-                  </li>
-                ))}
-              </ul>
-            )
-        }
-      </div>
+      <Container>
+        <Segment.Group>
+          <Segment>
+            <Header as='h3'>Add a Todo</Header>
+            <Form onSubmit={this.handleSubmit}>
+              <Form.Field>
+                <label>Name</label>
+                <input placeholder='Name' type="text" value={newTodoName} onChange={event => this.setState({ newTodoName: event.target.value })} />
+              </Form.Field>
+              <Form.Field>
+                <label>Description (optional)</label>
+                <input placeholder='Description (optional)' type="text" value={newTodoDescription || ''} onChange={event => this.setState({ newTodoDescription: event.target.value })} />
+              </Form.Field>
+              <Button icon labelPosition='left' type='submit'>
+                <Icon name='add' />
+                Add Todo
+          </Button>
+            </Form>
+          </Segment>
+
+          <Segment loading={areTodosLoading}>
+            <Header as='h3'>
+              <Icon name='unordered list' />
+              <Header.Content>Todos</Header.Content>
+            </Header>
+            {
+              allTodos.length < 1 ?
+                (
+                  <Message>
+                    <Message.Header>No todos exist...</Message.Header>
+                  </Message>
+                )
+                :
+                (
+                  <List celled>
+                    {allTodos.map(todo => (
+                      <List.Item>
+                        <List.Content>
+                          <List.Header>{todo.name}</List.Header>
+                          {todo.description || '/'}
+                        </List.Content>
+                      </List.Item>
+                    ))}
+                  </List>
+                )
+            }
+          </Segment>
+        </Segment.Group>
+      </Container>
     );
   }
 }
