@@ -9,6 +9,11 @@
             "UnauthRoleName": "todos-app-dev-20190614105427-unauthRole",
             "StackName": "todos-app-dev-20190614105427",
             "StackId": "arn:aws:cloudformation:eu-central-1:561253620376:stack/todos-app-dev-20190614105427/04197260-8e82-11e9-96d9-068030d9517a"
+        },
+        "categories": {
+            "auth": {
+                "todosapp2a2fdf63": {}
+            }
         }
     }
 }
