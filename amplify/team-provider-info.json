@@ -1,0 +1,14 @@
+{
+    "dev": {
+        "awscloudformation": {
+            "AuthRoleName": "todos-app-dev-20190614105427-authRole",
+            "UnauthRoleArn": "arn:aws:iam::561253620376:role/todos-app-dev-20190614105427-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::561253620376:role/todos-app-dev-20190614105427-authRole",
+            "Region": "eu-central-1",
+            "DeploymentBucketName": "todos-app-dev-20190614105427-deployment",
+            "UnauthRoleName": "todos-app-dev-20190614105427-unauthRole",
+            "StackName": "todos-app-dev-20190614105427",
+            "StackId": "arn:aws:cloudformation:eu-central-1:561253620376:stack/todos-app-dev-20190614105427/04197260-8e82-11e9-96d9-068030d9517a"
+        }
+    }
+}
