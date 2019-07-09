@@ -42,3 +42,13 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
 To learn React, check out the [React documentation](https://reactjs.org/).
+
+# AWS Amplify
+We use AWS Amplify as backend for our react app.
+General information about the setup: https://aws-amplify.github.io/docs/js/react
+
+## `amplify publish`
+Deploys the react app to AWS S3.
+
+## `amplify push`
+Pushes your changes of the GraphQL stuff to AWS.
