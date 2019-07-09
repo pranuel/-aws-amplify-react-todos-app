@@ -9,8 +9,10 @@ import { listTodos } from './graphql/queries';
 import { Todo } from './todo.model';
 import { GraphQLResult } from '@aws-amplify/api/lib/types';
 import Observable from 'zen-observable';
-import { List, Form, Button, Message, Header, Icon, Container, Segment, Divider } from 'semantic-ui-react'
+import { Header, Icon, Container, Segment } from 'semantic-ui-react'
 import 'semantic-ui-css/semantic.min.css'
+import { AddTodoForm } from './ui-components/AddTodoForm';
+import { TodosList } from './ui-components/TodosList';
 
 Amplify.configure(awsconfig);
 
@@ -88,20 +90,7 @@ class App extends React.Component<{}, AppState> {
         <Segment.Group>
           <Segment>
             <Header as='h3'>Add a Todo</Header>
-            <Form onSubmit={this.handleSubmit}>
-              <Form.Field>
-                <label>Name</label>
-                <input placeholder='Name' type="text" value={newTodoName} onChange={event => this.setState({ newTodoName: event.target.value })} />
-              </Form.Field>
-              <Form.Field>
-                <label>Description (optional)</label>
-                <input placeholder='Description (optional)' type="text" value={newTodoDescription || ''} onChange={event => this.setState({ newTodoDescription: event.target.value })} />
-              </Form.Field>
-              <Button icon labelPosition='left' type='submit'>
-                <Icon name='add' />
-                Add Todo
-          </Button>
-            </Form>
+            <AddTodoForm onSubmit={this.handleSubmit} todoName={newTodoName} onChangeTodoName={event => this.setState({ newTodoName: event.target.value })} todoDescription={newTodoDescription} onChangeTodoDescription={event => this.setState({ newTodoDescription: event.target.value })}></AddTodoForm>
           </Segment>
 
           <Segment loading={areTodosLoading}>
@@ -109,27 +98,7 @@ class App extends React.Component<{}, AppState> {
               <Icon name='unordered list' />
               <Header.Content>Todos</Header.Content>
             </Header>
-            {
-              allTodos.length < 1 ?
-                (
-                  <Message>
-                    <Message.Header>No todos exist...</Message.Header>
-                  </Message>
-                )
-                :
-                (
-                  <List celled>
-                    {allTodos.map(todo => (
-                      <List.Item>
-                        <List.Content>
-                          <List.Header>{todo.name}</List.Header>
-                          {todo.description || '/'}
-                        </List.Content>
-                      </List.Item>
-                    ))}
-                  </List>
-                )
-            }
+            <TodosList todos={allTodos}></TodosList>
           </Segment>
         </Segment.Group>
       </Container>
