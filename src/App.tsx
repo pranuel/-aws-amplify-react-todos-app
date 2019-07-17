@@ -3,8 +3,8 @@ import './App.css';
 import awsconfig from './aws-exports';
 import { withAuthenticator } from 'aws-amplify-react'; // or 'aws-amplify-react-native';
 import Amplify, { API, graphqlOperation } from 'aws-amplify';
-import { CreateTodoMutationVariables, ListTodosQuery } from './API';
-import { createTodo } from './graphql/mutations';
+import { CreateTodoMutationVariables, ListTodosQuery, DeleteTodoInput, UpdateTodoInput } from './API';
+import { createTodo, deleteTodo, updateTodo } from './graphql/mutations';
 import { listTodos } from './graphql/queries';
 import { Todo } from './todo.model';
 import { GraphQLResult } from '@aws-amplify/api/lib/types';
@@ -20,7 +20,7 @@ interface AppState {
   allTodos: Todo[];
   newTodoName: string;
   newTodoDescription?: string;
-  areTodosLoading: boolean
+  isLoading: boolean
 }
 
 class App extends React.Component<{}, AppState> {
@@ -30,7 +30,7 @@ class App extends React.Component<{}, AppState> {
     this.state = {
       allTodos: [],
       newTodoName: '',
-      areTodosLoading: false
+      isLoading: false
     };
     this.handleSubmit = this.handleSubmit.bind(this);
   }
@@ -71,9 +71,9 @@ class App extends React.Component<{}, AppState> {
   }
 
   listTodos = async () => {
-    this.setState({ areTodosLoading: true });
+    this.setState({ isLoading: true });
     const allTodosResult = await API.graphql(graphqlOperation(listTodos));
-    this.setState({ areTodosLoading: false });
+    this.setState({ isLoading: false });
     if (this.isGraphQLResult(allTodosResult)) {
       const listTodosQuery = allTodosResult.data as ListTodosQuery;
       if (!!listTodosQuery.listTodos) {
@@ -83,8 +83,26 @@ class App extends React.Component<{}, AppState> {
     }
   }
 
+  async onDeleteTodo(todo: Todo) {
+    this.setState({ isLoading: true });
+    const input: DeleteTodoInput = {
+      id: todo.id
+    };
+    await API.graphql(graphqlOperation(deleteTodo, { input }));
+    this.setState({ isLoading: false });
+    await this.listTodos();
+  }
+
+  async onEditTodo(todo: Todo) {
+    this.setState({ isLoading: true });
+    const input: UpdateTodoInput = todo;
+    await API.graphql(graphqlOperation(updateTodo, { input }));
+    this.setState({ isLoading: false });
+    await this.listTodos();
+  }
+
   render() {
-    const { allTodos, newTodoDescription, newTodoName, areTodosLoading } = this.state;
+    const { allTodos, newTodoDescription, newTodoName, isLoading } = this.state;
     return (
       <Container>
         <Segment.Group>
@@ -93,12 +111,12 @@ class App extends React.Component<{}, AppState> {
             <AddTodoForm onSubmit={this.handleSubmit} todoName={newTodoName} onChangeTodoName={event => this.setState({ newTodoName: event.target.value })} todoDescription={newTodoDescription} onChangeTodoDescription={event => this.setState({ newTodoDescription: event.target.value })}></AddTodoForm>
           </Segment>
 
-          <Segment loading={areTodosLoading}>
+          <Segment loading={isLoading}>
             <Header as='h3'>
               <Icon name='unordered list' />
               <Header.Content>Todos</Header.Content>
             </Header>
-            <TodosList todos={allTodos}></TodosList>
+            <TodosList todos={allTodos} onDeleteTodo={this.onDeleteTodo.bind(this)} onEditTodo={this.onEditTodo.bind(this)}></TodosList>
           </Segment>
         </Segment.Group>
       </Container>

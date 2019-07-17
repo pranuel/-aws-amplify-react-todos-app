@@ -1,9 +1,11 @@
 import React from 'react';
 import { Todo } from "../todo.model";
-import { Message, List } from "semantic-ui-react";
+import { Message, List, Icon, Button, Grid } from "semantic-ui-react";
 
 export interface TodosListProps {
-  todos: Todo[]
+  todos: Todo[],
+  onDeleteTodo: (todo: Todo) => void,
+  onEditTodo: (todo: Todo) => void,
 }
 
 export function TodosList(props: TodosListProps) {
@@ -23,7 +25,21 @@ export function TodosList(props: TodosListProps) {
                 <List.Item>
                   <List.Content>
                     <List.Header>{todo.name}</List.Header>
-                    {todo.description || '/'}
+                    <Grid>
+                      <Grid.Column floated='left' width={9}>
+                        {todo.description || '/'}
+                      </Grid.Column>
+                      <Grid.Column floated='right'>
+                        <Button.Group icon>
+                          <Button onClick={() => props.onEditTodo(todo)}>
+                            <Icon name='edit' />
+                          </Button>
+                          <Button onClick={() => props.onDeleteTodo(todo)}>
+                            <Icon name='delete' />
+                          </Button>
+                        </Button.Group>
+                      </Grid.Column>
+                    </Grid>
                   </List.Content>
                 </List.Item>
               ))}
