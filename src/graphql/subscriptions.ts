@@ -4,24 +4,24 @@
 export const onCreateTodo = `subscription OnCreateTodo {
   onCreateTodo {
     id
-    name
     description
+    isDone
   }
 }
 `;
 export const onUpdateTodo = `subscription OnUpdateTodo {
   onUpdateTodo {
     id
-    name
     description
+    isDone
   }
 }
 `;
 export const onDeleteTodo = `subscription OnDeleteTodo {
   onDeleteTodo {
     id
-    name
     description
+    isDone
   }
 }
 `;

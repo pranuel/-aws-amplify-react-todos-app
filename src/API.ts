@@ -3,14 +3,14 @@
 
 export type CreateTodoInput = {
   id?: string | null,
-  name: string,
-  description?: string | null,
+  description: string,
+  isDone: boolean,
 };
 
 export type UpdateTodoInput = {
   id: string,
-  name?: string | null,
   description?: string | null,
+  isDone?: boolean | null,
 };
 
 export type DeleteTodoInput = {
@@ -19,8 +19,8 @@ export type DeleteTodoInput = {
 
 export type ModelTodoFilterInput = {
   id?: ModelIDFilterInput | null,
-  name?: ModelStringFilterInput | null,
   description?: ModelStringFilterInput | null,
+  isDone?: ModelBooleanFilterInput | null,
   and?: Array< ModelTodoFilterInput | null > | null,
   or?: Array< ModelTodoFilterInput | null > | null,
   not?: ModelTodoFilterInput | null,
@@ -52,6 +52,11 @@ export type ModelStringFilterInput = {
   beginsWith?: string | null,
 };
 
+export type ModelBooleanFilterInput = {
+  ne?: boolean | null,
+  eq?: boolean | null,
+};
+
 export type CreateTodoMutationVariables = {
   input: CreateTodoInput,
 };
@@ -60,8 +65,8 @@ export type CreateTodoMutation = {
   createTodo:  {
     __typename: "Todo",
     id: string,
-    name: string,
-    description: string | null,
+    description: string,
+    isDone: boolean,
   } | null,
 };
 
@@ -73,8 +78,8 @@ export type UpdateTodoMutation = {
   updateTodo:  {
     __typename: "Todo",
     id: string,
-    name: string,
-    description: string | null,
+    description: string,
+    isDone: boolean,
   } | null,
 };
 
@@ -86,8 +91,8 @@ export type DeleteTodoMutation = {
   deleteTodo:  {
     __typename: "Todo",
     id: string,
-    name: string,
-    description: string | null,
+    description: string,
+    isDone: boolean,
   } | null,
 };
 
@@ -99,8 +104,8 @@ export type GetTodoQuery = {
   getTodo:  {
     __typename: "Todo",
     id: string,
-    name: string,
-    description: string | null,
+    description: string,
+    isDone: boolean,
   } | null,
 };
 
@@ -116,8 +121,8 @@ export type ListTodosQuery = {
     items:  Array< {
       __typename: "Todo",
       id: string,
-      name: string,
-      description: string | null,
+      description: string,
+      isDone: boolean,
     } | null > | null,
     nextToken: string | null,
   } | null,
@@ -127,8 +132,8 @@ export type OnCreateTodoSubscription = {
   onCreateTodo:  {
     __typename: "Todo",
     id: string,
-    name: string,
-    description: string | null,
+    description: string,
+    isDone: boolean,
   } | null,
 };
 
@@ -136,8 +141,8 @@ export type OnUpdateTodoSubscription = {
   onUpdateTodo:  {
     __typename: "Todo",
     id: string,
-    name: string,
-    description: string | null,
+    description: string,
+    isDone: boolean,
   } | null,
 };
 
@@ -145,7 +150,7 @@ export type OnDeleteTodoSubscription = {
   onDeleteTodo:  {
     __typename: "Todo",
     id: string,
-    name: string,
-    description: string | null,
+    description: string,
+    isDone: boolean,
   } | null,
 };

@@ -4,8 +4,8 @@
 export const getTodo = `query GetTodo($id: ID!) {
   getTodo(id: $id) {
     id
-    name
     description
+    isDone
   }
 }
 `;
@@ -17,8 +17,8 @@ export const listTodos = `query ListTodos(
   listTodos(filter: $filter, limit: $limit, nextToken: $nextToken) {
     items {
       id
-      name
       description
+      isDone
     }
     nextToken
   }

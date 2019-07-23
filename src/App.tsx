@@ -9,17 +9,15 @@ import { listTodos } from './graphql/queries';
 import { Todo } from './todo.model';
 import { GraphQLResult } from '@aws-amplify/api/lib/types';
 import Observable from 'zen-observable';
-import { Header, Icon, Container, Segment } from 'semantic-ui-react'
 import 'semantic-ui-css/semantic.min.css'
-import { AddTodoForm } from './ui-components/AddTodoForm';
-import { TodosList } from './ui-components/TodosList';
+import '../node_modules/todomvc-common/base.css';
+import '../node_modules/todomvc-app-css/index.css';
 
 Amplify.configure(awsconfig);
 
 interface AppState {
   allTodos: Todo[];
-  newTodoName: string;
-  newTodoDescription?: string;
+  newTodoDescription: string;
   isLoading: boolean
 }
 
@@ -29,26 +27,23 @@ class App extends React.Component<{}, AppState> {
     super(props);
     this.state = {
       allTodos: [],
-      newTodoName: '',
+      newTodoDescription: '',
       isLoading: false
     };
-    this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   async componentDidMount() {
     await this.listTodos();
   }
 
-  async handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    await this.createTodo();
+  async createTodo(key: string) {
+    if (key !== 'Enter') {
+      return;
+    }
     this.resetFormInputs();
-    event.preventDefault();
-  }
-
-  createTodo = async () => {
     const createTodoMutationVariables: CreateTodoMutationVariables = {
       input: {
-        name: this.state.newTodoName,
+        isDone: false,
         description: this.state.newTodoDescription
       }
     };
@@ -60,8 +55,7 @@ class App extends React.Component<{}, AppState> {
 
   private resetFormInputs() {
     this.setState({
-      newTodoDescription: '',
-      newTodoName: ''
+      newTodoDescription: ''
     });
   }
 
@@ -72,14 +66,19 @@ class App extends React.Component<{}, AppState> {
 
   listTodos = async () => {
     this.setState({ isLoading: true });
-    const allTodosResult = await API.graphql(graphqlOperation(listTodos));
-    this.setState({ isLoading: false });
-    if (this.isGraphQLResult(allTodosResult)) {
-      const listTodosQuery = allTodosResult.data as ListTodosQuery;
-      if (!!listTodosQuery.listTodos) {
-        const allTodos = listTodosQuery.listTodos.items as Todo[];
-        this.setState({ allTodos });
+    try {
+      const allTodosResult = await API.graphql(graphqlOperation(listTodos));
+      if (this.isGraphQLResult(allTodosResult)) {
+        const listTodosQuery = allTodosResult.data as ListTodosQuery;
+        if (!!listTodosQuery.listTodos) {
+          const allTodos = listTodosQuery.listTodos.items as Todo[];
+          this.setState({ allTodos });
+        }
       }
+    } catch (error) {
+      console.warn('Error during listTodos(): ', error);
+    } finally {
+      this.setState({ isLoading: false });
     }
   }
 
@@ -93,7 +92,17 @@ class App extends React.Component<{}, AppState> {
     await this.listTodos();
   }
 
-  async onEditTodo(todo: Todo) {
+  async onUpdateIsDone(todo: Todo, isDone: boolean) {
+    todo.isDone = isDone;
+    this.updateTodo(todo);
+  }
+
+  async onUpdateDescription(todo: Todo, description: string) {
+    todo.description = description;
+    this.updateTodo(todo);
+  }
+
+  private async updateTodo(todo: Todo) {
     this.setState({ isLoading: true });
     const input: UpdateTodoInput = todo;
     await API.graphql(graphqlOperation(updateTodo, { input }));
@@ -102,24 +111,34 @@ class App extends React.Component<{}, AppState> {
   }
 
   render() {
-    const { allTodos, newTodoDescription, newTodoName, isLoading } = this.state;
+    const { allTodos, newTodoDescription, isLoading } = this.state;
     return (
-      <Container>
-        <Segment.Group>
-          <Segment>
-            <Header as='h3'>Add a Todo</Header>
-            <AddTodoForm onSubmit={this.handleSubmit} todoName={newTodoName} onChangeTodoName={event => this.setState({ newTodoName: event.target.value })} todoDescription={newTodoDescription} onChangeTodoDescription={event => this.setState({ newTodoDescription: event.target.value })}></AddTodoForm>
-          </Segment>
-
-          <Segment loading={isLoading}>
-            <Header as='h3'>
-              <Icon name='unordered list' />
-              <Header.Content>Todos</Header.Content>
-            </Header>
-            <TodosList todos={allTodos} onDeleteTodo={this.onDeleteTodo.bind(this)} onEditTodo={this.onEditTodo.bind(this)}></TodosList>
-          </Segment>
-        </Segment.Group>
-      </Container>
+      <div>
+        {isLoading ? <p>Loading...</p> : ''}
+        <header className="header">
+          <h1>todos</h1>
+          <input className="new-todo" placeholder="What needs to be done?" value={newTodoDescription}
+            onChange={event => this.setState({ newTodoDescription: event.target.value })} onKeyDown={event => this.createTodo(event.key)} />
+        </header>
+        <section className="main">
+          <input id="toggle-all" className="toggle-all" type="checkbox" />
+          <label></label>
+          <ul className="todo-list">
+            {
+              allTodos.map(todo => (
+                <li key={todo.id}>
+                  <div className="view">
+                    <input className="toggle" type="checkbox" checked={todo.isDone} onClick={_event => this.onUpdateIsDone(todo, !todo.isDone)} />
+                    <label >{todo.description}</label>
+                    <button className="destroy" onClick={_event => this.onDeleteTodo(todo)}></button>
+                  </div>
+                  <input className="edit" value={todo.description} onChange={event => this.onUpdateDescription(todo, event.target.value)} />
+                </li>
+              ))
+            }
+          </ul>
+        </section>
+      </div>
     );
   }
 }

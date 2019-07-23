@@ -1,5 +1,5 @@
 export class Todo {
     id = '';
-    name = '';
-    description?: string;
+    isDone = false;
+    description = '';
 }
