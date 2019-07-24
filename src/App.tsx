@@ -88,7 +88,7 @@ class App extends React.Component<{}, AppState> {
     }
   }
 
-  private async onDeleteTodo(todo: Todo) {
+  private async deleteTodo(todo: Todo) {
     this.setState({ isLoading: true });
     const input: DeleteTodoInput = {
       id: todo.id
@@ -176,6 +176,17 @@ class App extends React.Component<{}, AppState> {
     this.setState({ currentViewMode: ViewModes.Completed });
   }
 
+  private get completedTodos() {
+    const { todos } = this.state;
+    return todos.filter(todo => todo.isDone);
+  }
+
+  private async clearCompletedTodos() {
+    const deleteTodoPromises = this.completedTodos.map(this.deleteTodo.bind(this));
+    await deleteTodoPromises;
+    this.listTodos();
+  }
+
   render() {
     const { todos: allTodos, newTodoDescription, isLoading, editTodo, currentViewMode: selectedViewMode } = this.state;
     return (
@@ -196,7 +207,7 @@ class App extends React.Component<{}, AppState> {
                   <div className="view">
                     <input className="toggle" type="checkbox" checked={todo.isDone} onChange={event => this.onUpdateIsDone(todo, event.target.checked)} />
                     <label >{todo.description}</label>
-                    <button className="destroy" onClick={_event => this.onDeleteTodo(todo)}></button>
+                    <button className="destroy" onClick={_event => this.deleteTodo(todo)}></button>
                   </div>
                   <input className="edit" value={!!editTodo ? editTodo.description : ''} onKeyDown={event => event.key === 'Enter' ? this.onUpdateTodoDescription(editTodo) : ''}
                     onBlur={_event => this.onUpdateTodoDescription(editTodo)} onChange={event => this.onChangeTodoDescription(editTodo, event.target.value)} />
@@ -219,7 +230,7 @@ class App extends React.Component<{}, AppState> {
             <span> </span>
             <li><a href="#/" onClick={_event => this.showCompletedTodos()} className={selectedViewMode === ViewModes.Completed ? 'selected' : ''}>Completed</a></li>
           </ul>
-          <button className="clear-completed">Clear completed</button>
+          <button className="clear-completed" onClick={_event => this.clearCompletedTodos()}>Clear completed</button>
         </footer>
       </div>
     );
