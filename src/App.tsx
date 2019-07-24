@@ -3,7 +3,7 @@ import './App.css';
 import awsconfig from './aws-exports';
 import { withAuthenticator } from 'aws-amplify-react'; // or 'aws-amplify-react-native';
 import Amplify, { API, graphqlOperation } from 'aws-amplify';
-import { CreateTodoMutationVariables, ListTodosQuery, DeleteTodoInput, UpdateTodoInput } from './API';
+import { CreateTodoMutationVariables, ListTodosQuery, DeleteTodoInput, UpdateTodoInput, ModelTodoFilterInput } from './API';
 import { createTodo, deleteTodo, updateTodo } from './graphql/mutations';
 import { listTodos } from './graphql/queries';
 import { Todo } from './todo.model';
@@ -70,10 +70,10 @@ class App extends React.Component<{}, AppState> {
     return (result as GraphQLResult).data !== undefined;
   }
 
-  private async listTodos() {
+  private async listTodos(filter?: ModelTodoFilterInput) {
     this.setState({ isLoading: true });
     try {
-      const allTodosResult = await API.graphql(graphqlOperation(listTodos));
+      const allTodosResult = await API.graphql(graphqlOperation(listTodos, { filter }));
       if (this.isGraphQLResult(allTodosResult)) {
         const listTodosQuery = allTodosResult.data as ListTodosQuery;
         if (!!listTodosQuery.listTodos) {
@@ -155,6 +155,27 @@ class App extends React.Component<{}, AppState> {
     return this.state.todos.filter(todo => !todo.isDone).length;
   }
 
+  private showAllTodos() {
+    this.listTodos();
+    this.setState({ currentViewMode: ViewModes.All });
+  }
+
+  private showActiveTodos() {
+    const filter: ModelTodoFilterInput = {
+      isDone: { eq: false }
+    };
+    this.listTodos(filter);
+    this.setState({ currentViewMode: ViewModes.Active });
+  }
+
+  private showCompletedTodos() {
+    const filter: ModelTodoFilterInput = {
+      isDone: { eq: true }
+    };
+    this.listTodos(filter);
+    this.setState({ currentViewMode: ViewModes.Completed });
+  }
+
   render() {
     const { todos: allTodos, newTodoDescription, isLoading, editTodo, currentViewMode: selectedViewMode } = this.state;
     return (
@@ -192,11 +213,11 @@ class App extends React.Component<{}, AppState> {
             <span> left</span>
           </span>
           <ul className="filters">
-            <li><a href="#/" onClick={_event => this.setState({ currentViewMode: ViewModes.All })} className={selectedViewMode === ViewModes.All ? 'selected' : ''}>All</a></li>
+            <li><a href="#/" onClick={_event => this.showAllTodos()} className={selectedViewMode === ViewModes.All ? 'selected' : ''}>All</a></li>
             <span> </span>
-            <li><a href="#/" onClick={_event => this.setState({ currentViewMode: ViewModes.Active })} className={selectedViewMode === ViewModes.Active ? 'selected' : ''}>Active</a></li>
+            <li><a href="#/" onClick={_event => this.showActiveTodos()} className={selectedViewMode === ViewModes.Active ? 'selected' : ''}>Active</a></li>
             <span> </span>
-            <li><a href="#/" onClick={_event => this.setState({ currentViewMode: ViewModes.Completed })} className={selectedViewMode === ViewModes.Completed ? 'selected' : ''}>Completed</a></li>
+            <li><a href="#/" onClick={_event => this.showCompletedTodos()} className={selectedViewMode === ViewModes.Completed ? 'selected' : ''}>Completed</a></li>
           </ul>
           <button className="clear-completed">Clear completed</button>
         </footer>
