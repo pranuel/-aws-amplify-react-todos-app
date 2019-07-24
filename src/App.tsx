@@ -9,17 +9,21 @@ import { listTodos } from './graphql/queries';
 import { Todo } from './todo.model';
 import { GraphQLResult } from '@aws-amplify/api/lib/types';
 import Observable from 'zen-observable';
-import 'semantic-ui-css/semantic.min.css'
 import '../node_modules/todomvc-common/base.css';
 import '../node_modules/todomvc-app-css/index.css';
 
 Amplify.configure(awsconfig);
 
+enum ViewModes {
+  All, Active, Completed
+}
+
 interface AppState {
-  allTodos: Todo[];
+  todos: Todo[];
   newTodoDescription: string;
   isLoading: boolean;
   editTodo?: Todo;
+  currentViewMode: ViewModes
 }
 
 class App extends React.Component<{}, AppState> {
@@ -27,9 +31,10 @@ class App extends React.Component<{}, AppState> {
   constructor(props: {}) {
     super(props);
     this.state = {
-      allTodos: [],
+      todos: [],
       newTodoDescription: '',
       isLoading: false,
+      currentViewMode: ViewModes.All
     };
   }
 
@@ -73,7 +78,7 @@ class App extends React.Component<{}, AppState> {
         const listTodosQuery = allTodosResult.data as ListTodosQuery;
         if (!!listTodosQuery.listTodos) {
           const allTodos = listTodosQuery.listTodos.items as Todo[];
-          this.setState({ allTodos });
+          this.setState({ todos: allTodos });
         }
       }
     } catch (error) {
@@ -123,12 +128,12 @@ class App extends React.Component<{}, AppState> {
   }
 
   private get areAllTodosDone() {
-    return this.state.allTodos.every(todo => todo.isDone);
+    return this.state.todos.every(todo => todo.isDone);
   }
 
   private toggleAllTodos() {
     const areAllTodosDone = this.areAllTodosDone;
-    this.state.allTodos.forEach(todo => {
+    this.state.todos.forEach(todo => {
       todo.isDone = !areAllTodosDone;
       this.updateTodo(todo);
     });
@@ -146,8 +151,12 @@ class App extends React.Component<{}, AppState> {
     return classNames.join(' ');
   }
 
+  private get itemsLeft() {
+    return this.state.todos.filter(todo => !todo.isDone).length;
+  }
+
   render() {
-    const { allTodos, newTodoDescription, isLoading, editTodo } = this.state;
+    const { todos: allTodos, newTodoDescription, isLoading, editTodo, currentViewMode: selectedViewMode } = this.state;
     return (
       <div>
         {isLoading ? <p>Loading...</p> : ''}
@@ -177,17 +186,17 @@ class App extends React.Component<{}, AppState> {
         </section>
         <footer className="footer">
           <span className="todo-count">
-            <strong>0</strong>
+            <strong>{this.itemsLeft}</strong>
             <span> </span>
             <span>items</span>
             <span> left</span>
           </span>
           <ul className="filters">
-            <li><a href="#/" className="selected">All</a></li>
+            <li><a href="#/" onClick={_event => this.setState({ currentViewMode: ViewModes.All })} className={selectedViewMode === ViewModes.All ? 'selected' : ''}>All</a></li>
             <span> </span>
-            <li><a href="#/active" className="">Active</a></li>
+            <li><a href="#/" onClick={_event => this.setState({ currentViewMode: ViewModes.Active })} className={selectedViewMode === ViewModes.Active ? 'selected' : ''}>Active</a></li>
             <span> </span>
-            <li><a href="#/completed" className="">Completed</a></li>
+            <li><a href="#/" onClick={_event => this.setState({ currentViewMode: ViewModes.Completed })} className={selectedViewMode === ViewModes.Completed ? 'selected' : ''}>Completed</a></li>
           </ul>
           <button className="clear-completed">Clear completed</button>
         </footer>
