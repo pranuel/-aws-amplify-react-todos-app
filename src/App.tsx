@@ -18,7 +18,8 @@ Amplify.configure(awsconfig);
 interface AppState {
   allTodos: Todo[];
   newTodoDescription: string;
-  isLoading: boolean
+  isLoading: boolean;
+  editTodo?: Todo;
 }
 
 class App extends React.Component<{}, AppState> {
@@ -28,7 +29,7 @@ class App extends React.Component<{}, AppState> {
     this.state = {
       allTodos: [],
       newTodoDescription: '',
-      isLoading: false
+      isLoading: false,
     };
   }
 
@@ -36,7 +37,7 @@ class App extends React.Component<{}, AppState> {
     await this.listTodos();
   }
 
-  async createTodo(key: string) {
+  private async createTodo(key: string) {
     if (key !== 'Enter') {
       return;
     }
@@ -59,12 +60,12 @@ class App extends React.Component<{}, AppState> {
     });
   }
 
-  isGraphQLResult(result: GraphQLResult | Observable<object>): result is GraphQLResult {
+  private isGraphQLResult(result: GraphQLResult | Observable<object>): result is GraphQLResult {
     // this crazy stuff was taken from here: https://www.typescriptlang.org/docs/handbook/advanced-types.html
     return (result as GraphQLResult).data !== undefined;
   }
 
-  listTodos = async () => {
+  private async listTodos() {
     this.setState({ isLoading: true });
     try {
       const allTodosResult = await API.graphql(graphqlOperation(listTodos));
@@ -82,7 +83,7 @@ class App extends React.Component<{}, AppState> {
     }
   }
 
-  async onDeleteTodo(todo: Todo) {
+  private async onDeleteTodo(todo: Todo) {
     this.setState({ isLoading: true });
     const input: DeleteTodoInput = {
       id: todo.id
@@ -92,14 +93,25 @@ class App extends React.Component<{}, AppState> {
     await this.listTodos();
   }
 
-  async onUpdateIsDone(todo: Todo, isDone: boolean) {
+  private async onUpdateIsDone(todo: Todo, isDone: boolean) {
     todo.isDone = isDone;
     this.updateTodo(todo);
   }
 
-  async onUpdateDescription(todo: Todo, description: string) {
-    todo.description = description;
+  private onUpdateTodoDescription(todo?: Todo) {
+    if (!todo) {
+      return;
+    }
     this.updateTodo(todo);
+    this.setState({ editTodo: undefined });
+  }
+
+  private onChangeTodoDescription(editTodo?: Todo, description?: string) {
+    if (!editTodo) {
+      return;
+    }
+    editTodo.description = description || '';
+    this.setState({ editTodo });
   }
 
   private async updateTodo(todo: Todo) {
@@ -110,8 +122,32 @@ class App extends React.Component<{}, AppState> {
     await this.listTodos();
   }
 
+  private get areAllTodosDone() {
+    return this.state.allTodos.every(todo => todo.isDone);
+  }
+
+  private toggleAllTodos() {
+    const areAllTodosDone = this.areAllTodosDone;
+    this.state.allTodos.forEach(todo => {
+      todo.isDone = !areAllTodosDone;
+      this.updateTodo(todo);
+    });
+  }
+
+  private getTodoListItemClassName(todo: Todo): string {
+    const classNames = [];
+    const { editTodo } = this.state;
+    if (todo.isDone) {
+      classNames.push('completed');
+    }
+    if (!!editTodo && editTodo.id === todo.id) {
+      classNames.push('editing');
+    }
+    return classNames.join(' ');
+  }
+
   render() {
-    const { allTodos, newTodoDescription, isLoading } = this.state;
+    const { allTodos, newTodoDescription, isLoading, editTodo } = this.state;
     return (
       <div>
         {isLoading ? <p>Loading...</p> : ''}
@@ -121,18 +157,19 @@ class App extends React.Component<{}, AppState> {
             onChange={event => this.setState({ newTodoDescription: event.target.value })} onKeyDown={event => this.createTodo(event.key)} />
         </header>
         <section className="main">
-          <input id="toggle-all" className="toggle-all" type="checkbox" />
+          <input id="toggle-all" className="toggle-all" type="checkbox" checked={this.areAllTodosDone} onChange={_event => this.toggleAllTodos()} />
           <label></label>
           <ul className="todo-list">
             {
               allTodos.map(todo => (
-                <li key={todo.id}>
+                <li className={this.getTodoListItemClassName(todo)} key={todo.id} onDoubleClick={_event => this.setState({ editTodo: todo })}>
                   <div className="view">
-                    <input className="toggle" type="checkbox" checked={todo.isDone} onClick={_event => this.onUpdateIsDone(todo, !todo.isDone)} />
+                    <input className="toggle" type="checkbox" checked={todo.isDone} onChange={event => this.onUpdateIsDone(todo, event.target.checked)} />
                     <label >{todo.description}</label>
                     <button className="destroy" onClick={_event => this.onDeleteTodo(todo)}></button>
                   </div>
-                  <input className="edit" value={todo.description} onChange={event => this.onUpdateDescription(todo, event.target.value)} />
+                  <input className="edit" value={!!editTodo ? editTodo.description : ''} onKeyDown={event => event.key === 'Enter' ? this.onUpdateTodoDescription(editTodo) : ''}
+                    onBlur={_event => this.onUpdateTodoDescription(editTodo)} onChange={event => this.onChangeTodoDescription(editTodo, event.target.value)} />
                 </li>
               ))
             }
