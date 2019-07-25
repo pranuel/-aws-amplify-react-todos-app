@@ -10,6 +10,8 @@
     "@types/semantic-ui": "^2.2.7",
     "aws-amplify": "^1.1.28",
     "aws-amplify-react": "^2.3.8",
+    "mobx": "^5.13.0",
+    "mobx-react": "^6.1.1",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react-scripts": "3.0.1",
