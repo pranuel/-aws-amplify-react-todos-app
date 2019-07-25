@@ -1,5 +1,7 @@
+import { observable } from "mobx";
+
 export class Todo {
     id = '';
-    isDone = false;
-    description = '';
+    @observable isDone = false;
+    @observable description = '';
 }
