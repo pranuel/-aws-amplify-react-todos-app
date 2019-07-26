@@ -9,6 +9,7 @@ import '../node_modules/todomvc-app-css/index.css';
 import { observer } from "mobx-react";
 import { ViewModes } from './viewmodes.model';
 import { TodoStore } from './todo.store';
+import { LoadingIndicator } from './components/loading-indicator/loading-indicator';
 
 Amplify.configure(awsconfig);
 
@@ -55,9 +56,9 @@ class App extends React.Component<{ todoStore: TodoStore }, {}> {
     return (
       <div>
         <section className="todoapp">
-          {isLoading ? <p>Loading...</p> : ''}
           <header className="header">
             <h1>todos</h1>
+            {isLoading ? <LoadingIndicator></LoadingIndicator> : ''}
             <input className="new-todo" placeholder="What needs to be done?" value={newTodoDescription}
               onChange={event => setNewTodoDescription(event.target.value)} onKeyDown={event => this.onNewTodoKeyDown(event.key)} />
           </header>
