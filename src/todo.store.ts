@@ -1,176 +1,194 @@
-import { observable, action, computed } from "mobx";
+import { action, autorun, computed, IReactionDisposer, observable } from "mobx";
+import * as Api from "./todo.api";
 import { Todo } from "./todo.model";
 import { ViewModes } from "./viewmodes.model";
-import { API, graphqlOperation } from "aws-amplify";
-import { listTodos } from "./graphql/queries";
-import { GraphQLResult } from '@aws-amplify/api/lib/types';
-import Observable from 'zen-observable';
-import { CreateTodoMutationVariables, ListTodosQuery, DeleteTodoInput, UpdateTodoInput, ModelTodoFilterInput } from './API';
-import { createTodo, deleteTodo, updateTodo } from './graphql/mutations';
 
 export class TodoStore {
+  @computed get areAllTodosDone() {
+    return this.todos.every((todo) => todo.isDone);
+  }
 
-  @observable todos: Todo[];
-  @observable newTodoDescription: string;
-  @observable isLoading: boolean;
-  @observable editTodo?: Todo;
-  @observable currentViewMode: ViewModes;
+  @computed get itemsLeft() {
+    return this.todos.filter((todo) => !todo.isDone).length;
+  }
+
+  @computed get completedTodos() {
+    return this.todos.filter((todo) => todo.isDone);
+  }
+
+  @observable public todos: Todo[];
+  @observable public newTodoDescription: string;
+  @observable public isLoading: boolean;
+  @observable public editTodo?: Todo;
+  @observable public currentViewMode: ViewModes;
+  @observable public error?: string;
+  private readonly autoRunDisposers: IReactionDisposer[];
 
   constructor() {
     this.todos = [];
-    this.newTodoDescription = '';
+    this.newTodoDescription = "";
     this.isLoading = false;
     this.currentViewMode = ViewModes.All;
+    this.autoRunDisposers = [];
+
+    this.initializeAutoRuns();
+  }
+
+  public dispose() {
+    this.autoRunDisposers.forEach((disposer) => {
+      disposer();
+    });
   }
 
   @action
-  setEditTodo = (editTodo: Todo) => {
+  public setEditTodo = (editTodo: Todo) => {
     this.editTodo = editTodo;
   }
 
   @action
-  setNewTodoDescription = (description: string) => {
+  public setNewTodoDescription = (description: string) => {
     this.newTodoDescription = description;
   }
 
   @action
-  fetchTodos = async (filter?: ModelTodoFilterInput) => {
+  public fetchAllTodos = async () => {
     this.isLoading = true;
     try {
-      const allTodosResult = await API.graphql(graphqlOperation(listTodos, { filter }));
-      if (this.isGraphQLResult(allTodosResult)) {
-        const listTodosQuery = allTodosResult.data as ListTodosQuery;
-        if (!!listTodosQuery.listTodos) {
-          const allTodos = listTodosQuery.listTodos.items as Todo[];
-          this.todos = allTodos;
-        }
-      }
+      this.todos = await Api.getAllTodos();
     } catch (error) {
-      console.warn('Error during fetchTodos(): ', error);
+      this.error = "Error during getAllTodos(): " + error;
     } finally {
       this.isLoading = false;
     }
   }
 
   @action
-  createTodo = async (description: string) => {
-    const createTodoMutationVariables: CreateTodoMutationVariables = {
-      input: {
-        isDone: false,
-        description
-      }
-    };
-    
-    this.resetNewTodoProperties();
-    await API.graphql(graphqlOperation(createTodo, createTodoMutationVariables));
-    // update todos list after creating a new one:
-    await this.fetchTodos();
-  }
-
-  @action
-  resetNewTodoProperties = () => {
-    this.setNewTodoDescription('');
-  }
-
-  deleteTodo = async (todo: Todo) => {
+  public fetchActiveTodos = async () => {
     this.isLoading = true;
-    const input: DeleteTodoInput = {
-      id: todo.id
-    };
-    await API.graphql(graphqlOperation(deleteTodo, { input }));
-    this.isLoading = false;
-    await this.fetchTodos();
-  }
-
-  updateTodoIsDone = async (todo: Todo, isDone: boolean) => {
-    todo.isDone = isDone;
-    this.updateTodo(todo);
+    try {
+      this.todos = await Api.getActiveTodos();
+    } catch (error) {
+      this.error = "Error during fetchActiveTodos(): " + error;
+    } finally {
+      this.isLoading = false;
+    }
   }
 
   @action
-  saveEditedTodo = (todo?: Todo) => {
-    if (!todo) {
-      return;
+  public fetchCompletedTodos = async () => {
+    this.isLoading = true;
+    try {
+      this.todos = await Api.getCompletedTodos();
+    } catch (error) {
+      this.error = "Error during fetchCompletedTodos(): " + error;
+    } finally {
+      this.isLoading = false;
     }
-    this.updateTodo(todo);
+  }
+
+  @action
+  public createTodo = async (description: string) => {
+    this.resetNewTodoProperties();
+    this.isLoading = true;
+    await Api.createTodo(description, false);
+    await this.fetchTodosDependingOnViewMode();
+    this.isLoading = false;
+  }
+
+  public deleteTodo = async (todo: Todo) => {
+    this.isLoading = true;
+    await Api.deleteTodo(todo);
+    await this.fetchTodosDependingOnViewMode();
+    this.isLoading = false;
+  }
+
+  public updateTodoIsDone = async (todo: Todo, isDone: boolean) => {
+    todo.isDone = isDone;
+    this.isLoading = true;
+    await Api.updateTodo(todo);
+    this.isLoading = false;
+  }
+
+  @action
+  public saveTodo = (todo: Todo) => {
+    this.isLoading = true;
+    Api.updateTodo(todo);
+    this.isLoading = false;
     this.editTodo = undefined;
   }
 
   @action
-  changeEditingTodoDescription = (editTodo?: Todo, description?: string) => {
+  public changeEditingTodoDescription = (
+    editTodo?: Todo,
+    description?: string,
+  ) => {
     if (!editTodo) {
       return;
     }
-    editTodo.description = description || '';
+    editTodo.description = description || "";
   }
 
   @action
-  updateTodo = async (todo: Todo) => {
-    this.isLoading = true;
-    const input: UpdateTodoInput = todo;
-    await API.graphql(graphqlOperation(updateTodo, { input }));
-    this.isLoading = false;
-    await this.fetchTodos();
-  }
-
-  @computed get areAllTodosDone() {
-    return this.todos.every(todo => todo.isDone);
-  }
-
-  @action
-  toggleAllTodos = async () => {
+  public toggleAllTodos = async () => {
     this.isLoading = true;
     const areAllTodosDone = this.areAllTodosDone;
-    const updateTodoPromises = this.todos.map(todo => {
+    const updateTodoPromises = this.todos.map((todo) => {
       todo.isDone = !areAllTodosDone;
-      return this.updateTodo(todo);
+      return Api.updateTodo(todo);
     });
     await updateTodoPromises;
     this.isLoading = false;
   }
 
-  @computed get itemsLeft() {
-    return this.todos.filter(todo => !todo.isDone).length;
-  }
-
   @action
-  showAllTodos = () => {
-    this.fetchTodos();
+  public showAllTodos = () => {
     this.currentViewMode = ViewModes.All;
   }
 
   @action
-  showActiveTodos = () => {
-    const filter: ModelTodoFilterInput = {
-      isDone: { eq: false }
-    };
-    this.fetchTodos(filter);
+  public showActiveTodos = () => {
     this.currentViewMode = ViewModes.Active;
   }
 
   @action
-  showCompletedTodos = () => {
-    const filter: ModelTodoFilterInput = {
-      isDone: { eq: true }
-    };
-    this.fetchTodos(filter);
+  public showCompletedTodos = () => {
     this.currentViewMode = ViewModes.Completed;
   }
 
-  @computed get completedTodos() {
-    return this.todos.filter(todo => todo.isDone);
+  @action
+  public clearCompletedTodos = async () => {
+    const deleteCompletedTodoPromises = this.completedTodos.map(
+      this.deleteTodo.bind(this),
+    );
+    this.isLoading = true;
+    await deleteCompletedTodoPromises;
+    await this.fetchTodosDependingOnViewMode();
+    this.isLoading = false;
+  }
+
+  private initializeAutoRuns() {
+    const reactOnViewModeDisposer = autorun(async () => {
+      await this.fetchTodosDependingOnViewMode();
+    });
+    this.autoRunDisposers.push(reactOnViewModeDisposer);
   }
 
   @action
-  clearCompletedTodos = async () => {
-    const deleteTodoPromises = this.completedTodos.map(this.deleteTodo.bind(this));
-    await deleteTodoPromises;
-    this.fetchTodos();
+  private resetNewTodoProperties = () => {
+    this.setNewTodoDescription("");
   }
 
-  private isGraphQLResult(result: GraphQLResult | Observable<object>): result is GraphQLResult {
-    // this crazy stuff was taken from here: https://www.typescriptlang.org/docs/handbook/advanced-types.html
-    return (result as GraphQLResult).data !== undefined;
+  private async fetchTodosDependingOnViewMode() {
+    switch (this.currentViewMode) {
+      case ViewModes.All:
+        await this.fetchAllTodos();
+        break;
+      case ViewModes.Active:
+        await this.fetchActiveTodos();
+        break;
+      case ViewModes.Completed:
+        await this.fetchCompletedTodos();
+        break;
+    }
   }
-
 }
