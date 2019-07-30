@@ -8,10 +8,10 @@ import "./App.css";
 import awsconfig from "./aws-exports";
 import { LoadingIndicator } from "./components/loading-indicator/loading-indicator";
 import { TodoListItem } from "./components/todo-list-item";
+import { TodosFilter } from "./components/todos-filter";
 import { isEnterKey } from "./helpers/keyboard.helper";
 import { Todo } from "./todo.model";
 import { TodoStore } from "./todo.store";
-import { ViewModes } from "./viewmodes.model";
 
 Amplify.configure(awsconfig);
 
@@ -32,6 +32,12 @@ class App extends React.Component<{ todoStore: TodoStore }, {}> {
       isLoading,
       itemsLeft,
       areAllTodosDone,
+      currentViewMode,
+      showAllTodos,
+      showActiveTodos,
+      showCompletedTodos,
+      clearCompletedTodos,
+      toggleAllTodos,
     } = this.props.todoStore;
     return (
       <div>
@@ -53,7 +59,7 @@ class App extends React.Component<{ todoStore: TodoStore }, {}> {
               className="toggle-all"
               type="checkbox"
               checked={areAllTodosDone}
-              onChange={this.onToggleAllTodos}
+              onChange={toggleAllTodos}
             />
             <label htmlFor="toggle-all" />
             <ul className="todo-list">{todos.map(this.getTodoListItem)}</ul>
@@ -65,41 +71,13 @@ class App extends React.Component<{ todoStore: TodoStore }, {}> {
               <span>items</span>
               <span> left</span>
             </span>
-            <ul className="filters">
-              <li>
-                <a
-                  href="#/"
-                  onClick={this.onShowAllTodosClicked}
-                  className={this.getTodosFilterClassName(ViewModes.All)}
-                >
-                  All
-                </a>
-              </li>
-              <span />
-              <li>
-                <a
-                  href="#/"
-                  onClick={this.onShowActiveTodosClicked}
-                  className={this.getTodosFilterClassName(ViewModes.Active)}
-                >
-                  Active
-                </a>
-              </li>
-              <span />
-              <li>
-                <a
-                  href="#/"
-                  onClick={this.onShowCompletedTodosClicked}
-                  className={this.getTodosFilterClassName(ViewModes.Completed)}
-                >
-                  Completed
-                </a>
-              </li>
-            </ul>
-            <button
-              className="clear-completed"
-              onClick={this.onClearCompletedClicked}
-            >
+            <TodosFilter
+              currentViewMode={currentViewMode}
+              onShowActiveTodosClicked={showActiveTodos}
+              onShowAllTodosClicked={showAllTodos}
+              onShowCompletedTodosClicked={showCompletedTodos}
+            />
+            <button className="clear-completed" onClick={clearCompletedTodos}>
               Clear completed
             </button>
           </footer>
@@ -115,28 +93,6 @@ class App extends React.Component<{ todoStore: TodoStore }, {}> {
         </footer>
       </div>
     );
-  }
-
-  private onClearCompletedClicked = () => {
-    this.props.todoStore.clearCompletedTodos();
-  }
-
-  private getTodosFilterClassName = (elementViewMode: ViewModes) => {
-    return this.props.todoStore.currentViewMode === elementViewMode
-      ? "selected"
-      : undefined;
-  }
-
-  private onShowAllTodosClicked = () => {
-    this.props.todoStore.showAllTodos();
-  }
-
-  private onShowActiveTodosClicked = () => {
-    this.props.todoStore.showActiveTodos();
-  }
-
-  private onShowCompletedTodosClicked = () => {
-    this.props.todoStore.showCompletedTodos();
   }
 
   private getTodoListItem = (todo: Todo) => {
@@ -160,10 +116,6 @@ class App extends React.Component<{ todoStore: TodoStore }, {}> {
         onTodoIsDoneToggled={updateTodoIsDone}
       />
     );
-  }
-
-  private onToggleAllTodos = () => {
-    this.props.todoStore.toggleAllTodos();
   }
 
   private onChangeNewTodoInput = (
