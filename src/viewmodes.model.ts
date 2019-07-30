@@ -1,3 +1,5 @@
 export enum ViewModes {
-  All, Active, Completed
+  All,
+  Active,
+  Completed,
 }
