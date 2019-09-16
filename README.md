@@ -52,3 +52,19 @@ Deploys the react app to AWS S3.
 
 ## `amplify push`
 Pushes your changes of the GraphQL stuff to AWS.
+
+## Initialize a new machine with amplify
+There are some steps you need to take to setup a new machine with amplify.
+
+### `amplify configure`
+Configures your local amplify environment.
+You need to do this everytime you setup your machine with amplify.
+If you setup a new machine and want to use your existing amplfiy resources just use the existing amplify user (you can find it here: https://console.aws.amazon.com/iam/home?region=undefined#/users).
+
+### `amplify init`
+Initializes your local amplify environment.
+Do this after `amplify configure` and just use the existing environment.
+
+### `amplify update api`
+This is required to workaround this bug here: https://github.com/aws-amplify/amplify-cli/issues/2260.
+Afterwards you should be able to `amplify push` again.
