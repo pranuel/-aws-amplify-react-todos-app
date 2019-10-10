@@ -1,6 +1,6 @@
 import { action, autorun, computed, IReactionDisposer, observable } from "mobx";
 import { Todo } from "./todo.model";
-import * as Repository from "./todo.repository";
+import { TodoRepository } from "./todo.repository";
 import { TodoStoreContract } from "./todo.store.contract";
 import { ViewModes } from "./viewmodes.model";
 
@@ -25,7 +25,7 @@ export class TodoStore implements TodoStoreContract {
   @observable public error?: string;
   private readonly autoRunDisposers: IReactionDisposer[];
 
-  constructor() {
+  constructor(private readonly todoRepository: TodoRepository) {
     this.todos = [];
     this.newTodoDescription = "";
     this.isFetchingData = false;
@@ -53,7 +53,7 @@ export class TodoStore implements TodoStoreContract {
   public refreshTodosList = async () => {
     this.isFetchingData = true;
     try {
-      this.todos = await Repository.getAllTodos();
+      this.todos = await this.todoRepository.getAllTodos();
     } catch (error) {
       this.error = "Error during getAllTodos(): " + error;
     } finally {
@@ -65,7 +65,7 @@ export class TodoStore implements TodoStoreContract {
   public refreshActiveTodos = async () => {
     this.isFetchingData = true;
     try {
-      this.todos = await Repository.getActiveTodos();
+      this.todos = await this.todoRepository.getActiveTodos();
     } catch (error) {
       this.error = "Error during fetchActiveTodos(): " + error;
     } finally {
@@ -77,7 +77,7 @@ export class TodoStore implements TodoStoreContract {
   public refreshCompletedTodos = async () => {
     this.isFetchingData = true;
     try {
-      this.todos = await Repository.getCompletedTodos();
+      this.todos = await this.todoRepository.getCompletedTodos();
     } catch (error) {
       this.error = "Error during fetchCompletedTodos(): " + error;
     } finally {
@@ -89,14 +89,14 @@ export class TodoStore implements TodoStoreContract {
   public createTodo = async (description: string) => {
     this.resetNewTodoProperties();
     this.isFetchingData = true;
-    await Repository.createTodo(description, false);
+    await this.todoRepository.createTodo(description, false);
     await this.fetchTodosDependingOnViewMode();
     this.isFetchingData = false;
   }
 
   public deleteTodo = async (todo: Todo) => {
     this.isFetchingData = true;
-    await Repository.deleteTodo(todo);
+    await this.todoRepository.deleteTodo(todo);
     await this.fetchTodosDependingOnViewMode();
     this.isFetchingData = false;
   }
@@ -104,14 +104,14 @@ export class TodoStore implements TodoStoreContract {
   public updateTodoIsDone = async (todo: Todo, isDone: boolean) => {
     todo.isDone = isDone;
     this.isFetchingData = true;
-    await Repository.updateTodo(todo);
+    await this.todoRepository.updateTodo(todo);
     this.isFetchingData = false;
   }
 
   @action
   public saveTodo = async (todo: Todo) => {
     this.isFetchingData = true;
-    await Repository.updateTodo(todo);
+    await this.todoRepository.updateTodo(todo);
     this.isFetchingData = false;
     this.editTodo = undefined;
   }
@@ -133,7 +133,7 @@ export class TodoStore implements TodoStoreContract {
     const areAllTodosDone = this.areAllTodosDone;
     const updateTodoPromises = this.todos.map((todo) => {
       todo.isDone = !areAllTodosDone;
-      return Repository.updateTodo(todo);
+      return this.todoRepository.updateTodo(todo);
     });
     await Promise.all(updateTodoPromises);
     this.isFetchingData = false;
