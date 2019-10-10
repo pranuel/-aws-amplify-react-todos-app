@@ -1,6 +1,6 @@
 import React, { ChangeEvent } from "react";
 import { isEnterKey } from "../helpers/keyboard.helper";
-import { Todo } from "../todo.model";
+import { Todo } from "../todos/todo.model";
 
 interface TodoListItemProps {
   todo: Todo;

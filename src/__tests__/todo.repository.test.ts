@@ -1,15 +1,13 @@
-import { GraphQLOptions } from "@aws-amplify/api/lib/types";
-import { API, graphqlOperation } from "aws-amplify";
-import { of } from "zen-observable";
-import { Todo } from "./todo.model";
-import * as TodoApi from "./todo.repository";
+import { API } from "aws-amplify";
+import { Todo } from "../todos/todo.model";
+import * as TodoRepository from "../todos/todo.repository";
 
 describe("TodoApi", () => {
   let graphqlSpy: jest.SpyInstance;
 
   beforeEach(() => {
     graphqlSpy = jest.spyOn(API, "graphql");
-    graphqlSpy.mockReturnValue(of({}));
+    graphqlSpy.mockReturnValue(Promise.resolve({}));
   });
 
   describe("should create a proper GraphQL mutation for", () => {
@@ -26,7 +24,7 @@ describe("TodoApi", () => {
         },
       };
       // act
-      await TodoApi.createTodo(description, isDone);
+      await TodoRepository.createTodo(description, isDone);
       // assert
       expect(graphqlSpy).toBeCalledWith(
         expect.objectContaining(expectedMutationVariables),
@@ -46,7 +44,7 @@ describe("TodoApi", () => {
         },
       };
       // act
-      await TodoApi.updateTodo(todo);
+      await TodoRepository.updateTodo(todo);
       // assert
       expect(graphqlSpy).toBeCalledWith(
         expect.objectContaining(expectedMutationVariables),
@@ -68,7 +66,7 @@ describe("TodoApi", () => {
         },
       };
       // act
-      await TodoApi.deleteTodo(todo);
+      await TodoRepository.deleteTodo(todo);
       // assert
       expect(graphqlSpy).toBeCalledWith(
         expect.objectContaining(expectedMutationVariables),
@@ -83,7 +81,7 @@ describe("TodoApi", () => {
         variables: { filter: undefined },
       };
       // act
-      await TodoApi.getAllTodos();
+      await TodoRepository.getAllTodos();
       // assert
       expect(graphqlSpy).toBeCalledWith(
         expect.objectContaining(expectedQueryVariables),
@@ -100,9 +98,9 @@ describe("TodoApi", () => {
         },
       };
       jest.spyOn(API, "graphql");
-      graphqlSpy.mockReturnValue(of({}));
+      graphqlSpy.mockReturnValue(Promise.resolve({}));
       // act
-      await TodoApi.getCompletedTodos();
+      await TodoRepository.getCompletedTodos();
       // assert
       expect(graphqlSpy).toBeCalledWith(
         expect.objectContaining(expectedQueryVariables),
@@ -119,9 +117,9 @@ describe("TodoApi", () => {
         },
       };
       jest.spyOn(API, "graphql");
-      graphqlSpy.mockReturnValue(of({}));
+      graphqlSpy.mockReturnValue(Promise.resolve({}));
       // act
-      await TodoApi.getActiveTodos();
+      await TodoRepository.getActiveTodos();
       // assert
       expect(graphqlSpy).toBeCalledWith(
         expect.objectContaining(expectedQueryVariables),

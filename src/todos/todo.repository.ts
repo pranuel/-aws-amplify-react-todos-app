@@ -6,9 +6,9 @@ import {
   ListTodosQuery,
   ModelTodoFilterInput,
   UpdateTodoInput,
-} from "./API";
-import * as Mutations from "./graphql/mutations";
-import { listTodos } from "./graphql/queries";
+} from "../API";
+import * as Mutations from "../graphql/mutations";
+import { listTodos } from "../graphql/queries";
 import { Todo } from "./todo.model";
 
 /*

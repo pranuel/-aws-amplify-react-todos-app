@@ -1,4 +1,4 @@
-import { isEnterKey } from "./keyboard.helper";
+import { isEnterKey } from "../helpers/keyboard.helper";
 
 describe("KeyboardHelper", () => {
   it("should return true if it is the enter key", () => {

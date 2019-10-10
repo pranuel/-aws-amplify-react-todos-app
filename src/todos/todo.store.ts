@@ -1,9 +1,10 @@
 import { action, autorun, computed, IReactionDisposer, observable } from "mobx";
-import * as Api from "./todo.api";
 import { Todo } from "./todo.model";
+import * as Repository from "./todo.repository";
+import { TodoStoreContract } from "./todo.store.contract";
 import { ViewModes } from "./viewmodes.model";
 
-export class TodoStore {
+export class TodoStore implements TodoStoreContract {
   @computed get areAllTodosDone() {
     return this.todos.every((todo) => todo.isDone);
   }
@@ -30,8 +31,6 @@ export class TodoStore {
     this.isLoading = false;
     this.currentViewMode = ViewModes.All;
     this.autoRunDisposers = [];
-
-    this.initializeAutoRuns();
   }
 
   public dispose() {
@@ -51,10 +50,10 @@ export class TodoStore {
   }
 
   @action
-  public fetchAllTodos = async () => {
+  public refreshTodosList = async () => {
     this.isLoading = true;
     try {
-      this.todos = await Api.getAllTodos();
+      this.todos = await Repository.getAllTodos();
     } catch (error) {
       this.error = "Error during getAllTodos(): " + error;
     } finally {
@@ -63,10 +62,10 @@ export class TodoStore {
   }
 
   @action
-  public fetchActiveTodos = async () => {
+  public refreshActiveTodos = async () => {
     this.isLoading = true;
     try {
-      this.todos = await Api.getActiveTodos();
+      this.todos = await Repository.getActiveTodos();
     } catch (error) {
       this.error = "Error during fetchActiveTodos(): " + error;
     } finally {
@@ -75,10 +74,10 @@ export class TodoStore {
   }
 
   @action
-  public fetchCompletedTodos = async () => {
+  public refreshCompletedTodos = async () => {
     this.isLoading = true;
     try {
-      this.todos = await Api.getCompletedTodos();
+      this.todos = await Repository.getCompletedTodos();
     } catch (error) {
       this.error = "Error during fetchCompletedTodos(): " + error;
     } finally {
@@ -90,14 +89,14 @@ export class TodoStore {
   public createTodo = async (description: string) => {
     this.resetNewTodoProperties();
     this.isLoading = true;
-    await Api.createTodo(description, false);
+    await Repository.createTodo(description, false);
     await this.fetchTodosDependingOnViewMode();
     this.isLoading = false;
   }
 
   public deleteTodo = async (todo: Todo) => {
     this.isLoading = true;
-    await Api.deleteTodo(todo);
+    await Repository.deleteTodo(todo);
     await this.fetchTodosDependingOnViewMode();
     this.isLoading = false;
   }
@@ -105,14 +104,14 @@ export class TodoStore {
   public updateTodoIsDone = async (todo: Todo, isDone: boolean) => {
     todo.isDone = isDone;
     this.isLoading = true;
-    await Api.updateTodo(todo);
+    await Repository.updateTodo(todo);
     this.isLoading = false;
   }
 
   @action
-  public saveTodo = (todo: Todo) => {
+  public saveTodo = async (todo: Todo) => {
     this.isLoading = true;
-    Api.updateTodo(todo);
+    await Repository.updateTodo(todo);
     this.isLoading = false;
     this.editTodo = undefined;
   }
@@ -134,7 +133,7 @@ export class TodoStore {
     const areAllTodosDone = this.areAllTodosDone;
     const updateTodoPromises = this.todos.map((todo) => {
       todo.isDone = !areAllTodosDone;
-      return Api.updateTodo(todo);
+      return Repository.updateTodo(todo);
     });
     await updateTodoPromises;
     this.isLoading = false;
@@ -166,7 +165,7 @@ export class TodoStore {
     this.isLoading = false;
   }
 
-  private initializeAutoRuns() {
+  public initializeStore() {
     const reactOnViewModeDisposer = autorun(async () => {
       await this.fetchTodosDependingOnViewMode();
     });
@@ -181,13 +180,13 @@ export class TodoStore {
   private async fetchTodosDependingOnViewMode() {
     switch (this.currentViewMode) {
       case ViewModes.All:
-        await this.fetchAllTodos();
+        await this.refreshTodosList();
         break;
       case ViewModes.Active:
-        await this.fetchActiveTodos();
+        await this.refreshActiveTodos();
         break;
       case ViewModes.Completed:
-        await this.fetchCompletedTodos();
+        await this.refreshCompletedTodos();
         break;
     }
   }

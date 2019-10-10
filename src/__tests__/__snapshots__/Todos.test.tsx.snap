@@ -1,0 +1,179 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Todos should render correctly 1`] = `
+<div>
+  <section
+    className="todoapp"
+  >
+    <header
+      className="header"
+    >
+      <h1>
+        todos
+      </h1>
+      
+      <input
+        className="new-todo"
+        onChange={[Function]}
+        onKeyDown={[Function]}
+        placeholder="What needs to be done?"
+        value="foo"
+      />
+    </header>
+    <section
+      className="main"
+    >
+      <input
+        checked={false}
+        className="toggle-all"
+        id="toggle-all"
+        onChange={[MockFunction]}
+        type="checkbox"
+      />
+      <label
+        htmlFor="toggle-all"
+      />
+      <ul
+        className="todo-list"
+      >
+        <li
+          className=""
+          onDoubleClick={[Function]}
+        >
+          <div
+            className="view"
+          >
+            <input
+              checked={false}
+              className="toggle"
+              onChange={[Function]}
+              type="checkbox"
+            />
+            <label>
+              bar description
+            </label>
+            <button
+              className="destroy"
+              onClick={[Function]}
+            />
+          </div>
+          <input
+            className="edit"
+            onBlur={[Function]}
+            onChange={[Function]}
+            onKeyDown={[Function]}
+            value=""
+          />
+        </li>
+        <li
+          className=""
+          onDoubleClick={[Function]}
+        >
+          <div
+            className="view"
+          >
+            <input
+              checked={false}
+              className="toggle"
+              onChange={[Function]}
+              type="checkbox"
+            />
+            <label>
+              foo description
+            </label>
+            <button
+              className="destroy"
+              onClick={[Function]}
+            />
+          </div>
+          <input
+            className="edit"
+            onBlur={[Function]}
+            onChange={[Function]}
+            onKeyDown={[Function]}
+            value=""
+          />
+        </li>
+      </ul>
+    </section>
+    <footer
+      className="footer"
+    >
+      <span
+        className="todo-count"
+      >
+        <strong>
+          2
+        </strong>
+        <span />
+        <span>
+          items
+        </span>
+        <span>
+           left
+        </span>
+      </span>
+      <ul
+        className="filters"
+      >
+        <li>
+          <a
+            className="selected"
+            href="#/"
+            onClick={[MockFunction]}
+          >
+            All
+          </a>
+        </li>
+        <span />
+        <li>
+          <a
+            href="#/"
+            onClick={[MockFunction]}
+          >
+            Active
+          </a>
+        </li>
+        <span />
+        <li>
+          <a
+            href="#/"
+            onClick={[MockFunction]}
+          >
+            Completed
+          </a>
+        </li>
+      </ul>
+      <button
+        className="clear-completed"
+        onClick={[MockFunction]}
+      >
+        Clear completed
+      </button>
+    </footer>
+  </section>
+  <footer
+    className="info"
+  >
+    <p>
+      Double-click to edit a todo
+    </p>
+    <p>
+      Created by 
+      <a
+        href="https://github.com/pranuel"
+      >
+        Pranuel
+      </a>
+    </p>
+    <p>
+      Part of 
+      <a
+        href="http://todomvc.com"
+      >
+        TodoMVC
+      </a>
+    </p>
+  </footer>
+</div>
+`;

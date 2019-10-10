@@ -1,12 +1,15 @@
+import Amplify from "aws-amplify";
+import { withAuthenticator } from "aws-amplify-react";
 import React from "react";
 import ReactDOM from "react-dom";
-// import './index.css';
-import App from "./App";
+import { App } from "./App";
+import awsconfig from "./aws-exports";
 import * as serviceWorker from "./serviceWorker";
-import { TodoStore } from "./todo.store";
+
+Amplify.configure(awsconfig);
 
 ReactDOM.render(
-  <App todoStore={new TodoStore()} />,
+  withAuthenticator(<App />, true),
   document.getElementById("root"),
 );
 

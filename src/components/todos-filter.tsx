@@ -1,5 +1,5 @@
 import React from "react";
-import { ViewModes } from "../viewmodes.model";
+import { ViewModes } from "../todos/viewmodes.model";
 
 interface TodosFilterProps {
   currentViewMode: ViewModes;
