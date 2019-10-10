@@ -135,7 +135,7 @@ export class TodoStore implements TodoStoreContract {
       todo.isDone = !areAllTodosDone;
       return Repository.updateTodo(todo);
     });
-    await updateTodoPromises;
+    await Promise.all(updateTodoPromises);
     this.isLoading = false;
   }
 
@@ -160,7 +160,7 @@ export class TodoStore implements TodoStoreContract {
       this.deleteTodo.bind(this),
     );
     this.isLoading = true;
-    await deleteCompletedTodoPromises;
+    await Promise.all(deleteCompletedTodoPromises);
     await this.fetchTodosDependingOnViewMode();
     this.isLoading = false;
   }
