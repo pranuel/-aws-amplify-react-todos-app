@@ -25,7 +25,7 @@ export class Todos extends React.Component<
     const {
       todos,
       newTodoDescription,
-      isLoading,
+      isFetchingData: isLoading,
       itemsLeft,
       areAllTodosDone,
       currentViewMode,

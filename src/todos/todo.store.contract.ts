@@ -8,7 +8,7 @@ export interface TodoStoreContract {
 
   todos: Todo[];
   newTodoDescription: string;
-  isLoading: boolean;
+  isFetchingData: boolean;
   editTodo?: Todo;
   currentViewMode: ViewModes;
   error?: string;

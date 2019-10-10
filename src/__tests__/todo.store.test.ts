@@ -13,6 +13,6 @@ describe("TodoStore", () => {
   });
 
   it("should by default inidicate that data is not loading", () => {
-    expect(todoStore.isLoading).toBe(false);
+    expect(todoStore.isFetchingData).toBe(false);
   });
 });

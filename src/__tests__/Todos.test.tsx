@@ -13,7 +13,7 @@ describe("Todos", () => {
       currentViewMode: ViewModes.All,
       editTodo: undefined,
       error: undefined,
-      isLoading: false,
+      isFetchingData: false,
       itemsLeft: 2,
       newTodoDescription: "foo",
       todos: [
