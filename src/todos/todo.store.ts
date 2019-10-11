@@ -1,8 +1,8 @@
 import { action, autorun, computed, IReactionDisposer, observable } from "mobx";
+import { TodoFilter } from "./todo-filter.model";
 import { Todo } from "./todo.model";
 import { TodoRepository } from "./todo.repository";
 import { TodoStoreContract } from "./todo.store.contract";
-import { ViewModes } from "./viewmodes.model";
 
 export class TodoStore implements TodoStoreContract {
   @computed get areAllTodosDone() {
@@ -21,7 +21,7 @@ export class TodoStore implements TodoStoreContract {
   @observable public newTodoDescription: string;
   @observable public isFetchingData: boolean;
   @observable public editTodo?: Todo;
-  @observable public currentViewMode: ViewModes;
+  @observable public todoFilter: TodoFilter;
   @observable public error?: string;
   private readonly autoRunDisposers: IReactionDisposer[];
 
@@ -29,7 +29,7 @@ export class TodoStore implements TodoStoreContract {
     this.todos = [];
     this.newTodoDescription = "";
     this.isFetchingData = false;
-    this.currentViewMode = ViewModes.All;
+    this.todoFilter = TodoFilter.All;
     this.autoRunDisposers = [];
   }
 
@@ -50,57 +50,23 @@ export class TodoStore implements TodoStoreContract {
   }
 
   @action
-  public refreshTodosList = async () => {
-    this.isFetchingData = true;
-    try {
-      this.todos = await this.todoRepository.getAllTodos();
-    } catch (error) {
-      this.error = "Error during getAllTodos(): " + error;
-    } finally {
-      this.isFetchingData = false;
-    }
-  }
-
-  @action
-  public refreshActiveTodos = async () => {
-    this.isFetchingData = true;
-    try {
-      this.todos = await this.todoRepository.getActiveTodos();
-    } catch (error) {
-      this.error = "Error during fetchActiveTodos(): " + error;
-    } finally {
-      this.isFetchingData = false;
-    }
-  }
-
-  @action
-  public refreshCompletedTodos = async () => {
-    this.isFetchingData = true;
-    try {
-      this.todos = await this.todoRepository.getCompletedTodos();
-    } catch (error) {
-      this.error = "Error during fetchCompletedTodos(): " + error;
-    } finally {
-      this.isFetchingData = false;
-    }
-  }
-
-  @action
   public createTodo = async (description: string) => {
     this.resetNewTodoProperties();
     this.isFetchingData = true;
     await this.todoRepository.createTodo(description, false);
-    await this.fetchTodosDependingOnViewMode();
+    await this.refreshTodosList();
     this.isFetchingData = false;
   }
 
+  @action
   public deleteTodo = async (todo: Todo) => {
     this.isFetchingData = true;
     await this.todoRepository.deleteTodo(todo);
-    await this.fetchTodosDependingOnViewMode();
+    await this.refreshTodosList();
     this.isFetchingData = false;
   }
 
+  @action
   public updateTodoIsDone = async (todo: Todo, isDone: boolean) => {
     todo.isDone = isDone;
     this.isFetchingData = true;
@@ -141,17 +107,17 @@ export class TodoStore implements TodoStoreContract {
 
   @action
   public showAllTodos = () => {
-    this.currentViewMode = ViewModes.All;
+    this.todoFilter = TodoFilter.All;
   }
 
   @action
   public showActiveTodos = () => {
-    this.currentViewMode = ViewModes.Active;
+    this.todoFilter = TodoFilter.Active;
   }
 
   @action
   public showCompletedTodos = () => {
-    this.currentViewMode = ViewModes.Completed;
+    this.todoFilter = TodoFilter.Completed;
   }
 
   @action
@@ -161,33 +127,69 @@ export class TodoStore implements TodoStoreContract {
     );
     this.isFetchingData = true;
     await Promise.all(deleteCompletedTodoPromises);
-    await this.fetchTodosDependingOnViewMode();
+    await this.refreshTodosList();
     this.isFetchingData = false;
   }
 
   public initializeStore() {
     const reactOnViewModeDisposer = autorun(async () => {
-      await this.fetchTodosDependingOnViewMode();
+      await this.refreshTodosList();
     });
     this.autoRunDisposers.push(reactOnViewModeDisposer);
+  }
+
+  public async refreshTodosList() {
+    switch (this.todoFilter) {
+      case TodoFilter.All:
+        await this.refreshAllTodos();
+        break;
+      case TodoFilter.Active:
+        await this.refreshActiveTodos();
+        break;
+      case TodoFilter.Completed:
+        await this.refreshCompletedTodos();
+        break;
+    }
+  }
+
+  @action
+  private refreshAllTodos = async () => {
+    this.isFetchingData = true;
+    try {
+      this.todos = await this.todoRepository.getAllTodos();
+    } catch (error) {
+      this.error = "Error during getAllTodos(): " + error;
+    } finally {
+      this.isFetchingData = false;
+    }
+  }
+
+  @action
+  private refreshActiveTodos = async () => {
+    this.isFetchingData = true;
+    try {
+      this.todos = await this.todoRepository.getActiveTodos();
+    } catch (error) {
+      this.error = "Error during fetchActiveTodos(): " + error;
+    } finally {
+      this.isFetchingData = false;
+    }
+  }
+
+  @action
+  private refreshCompletedTodos = async () => {
+    this.isFetchingData = true;
+    try {
+      this.todos = await this.todoRepository.getCompletedTodos();
+    } catch (error) {
+      this.error = "Error during fetchCompletedTodos(): " + error;
+    } finally {
+      this.isFetchingData = false;
+    }
   }
 
   @action
   private resetNewTodoProperties = () => {
     this.setNewTodoDescription("");
-  }
-
-  private async fetchTodosDependingOnViewMode() {
-    switch (this.currentViewMode) {
-      case ViewModes.All:
-        await this.refreshTodosList();
-        break;
-      case ViewModes.Active:
-        await this.refreshActiveTodos();
-        break;
-      case ViewModes.Completed:
-        await this.refreshCompletedTodos();
-        break;
-    }
   }
 }

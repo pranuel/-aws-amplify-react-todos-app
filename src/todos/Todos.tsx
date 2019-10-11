@@ -28,7 +28,7 @@ export class Todos extends React.Component<
       isFetchingData: isLoading,
       itemsLeft,
       areAllTodosDone,
-      currentViewMode,
+      todoFilter,
       showAllTodos,
       showActiveTodos,
       showCompletedTodos,
@@ -68,7 +68,7 @@ export class Todos extends React.Component<
               <span> left</span>
             </span>
             <TodosFilter
-              currentViewMode={currentViewMode}
+              todoFilter={todoFilter}
               onShowActiveTodosClicked={showActiveTodos}
               onShowAllTodosClicked={showAllTodos}
               onShowCompletedTodosClicked={showCompletedTodos}

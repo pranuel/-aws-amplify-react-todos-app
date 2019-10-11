@@ -1,8 +1,8 @@
 import React from "react";
-import { ViewModes } from "../todos/viewmodes.model";
+import { TodoFilter } from "../todos/todo-filter.model";
 
 interface TodosFilterProps {
-  currentViewMode: ViewModes;
+  todoFilter: TodoFilter;
   onShowAllTodosClicked: () => void;
   onShowActiveTodosClicked: () => void;
   onShowCompletedTodosClicked: () => void;
@@ -16,7 +16,7 @@ export class TodosFilter extends React.Component<TodosFilterProps, {}> {
           <a
             href="#/"
             onClick={this.props.onShowAllTodosClicked}
-            className={this.getTodosFilterClassName(ViewModes.All)}
+            className={this.getTodosFilterClassName(TodoFilter.All)}
           >
             All
           </a>
@@ -26,7 +26,7 @@ export class TodosFilter extends React.Component<TodosFilterProps, {}> {
           <a
             href="#/"
             onClick={this.props.onShowActiveTodosClicked}
-            className={this.getTodosFilterClassName(ViewModes.Active)}
+            className={this.getTodosFilterClassName(TodoFilter.Active)}
           >
             Active
           </a>
@@ -36,7 +36,7 @@ export class TodosFilter extends React.Component<TodosFilterProps, {}> {
           <a
             href="#/"
             onClick={this.props.onShowCompletedTodosClicked}
-            className={this.getTodosFilterClassName(ViewModes.Completed)}
+            className={this.getTodosFilterClassName(TodoFilter.Completed)}
           >
             Completed
           </a>
@@ -45,9 +45,7 @@ export class TodosFilter extends React.Component<TodosFilterProps, {}> {
     );
   }
 
-  private getTodosFilterClassName = (elementViewMode: ViewModes) => {
-    return this.props.currentViewMode === elementViewMode
-      ? "selected"
-      : undefined;
+  private getTodosFilterClassName = (elementTodoFilter: TodoFilter) => {
+    return this.props.todoFilter === elementTodoFilter ? "selected" : undefined;
   }
 }

@@ -1,8 +1,8 @@
 import React from "react";
 import renderer from "react-test-renderer";
+import { TodoFilter } from "../todos/todo-filter.model";
 import { TodoStoreContract } from "../todos/todo.store.contract";
 import { Todos } from "../todos/Todos";
-import { ViewModes } from "../todos/viewmodes.model";
 
 describe("Todos", () => {
   it("should render correctly", () => {
@@ -10,7 +10,7 @@ describe("Todos", () => {
       // public props
       areAllTodosDone: false,
       completedTodos: [],
-      currentViewMode: ViewModes.All,
+      todoFilter: TodoFilter.All,
       editTodo: undefined,
       error: undefined,
       isFetchingData: false,
@@ -36,8 +36,6 @@ describe("Todos", () => {
       createTodo: jest.fn(),
       deleteTodo: jest.fn(),
       dispose: jest.fn(),
-      refreshActiveTodos: jest.fn(),
-      refreshCompletedTodos: jest.fn(),
       saveTodo: jest.fn(),
       setEditTodo: jest.fn(),
       setNewTodoDescription: jest.fn(),
