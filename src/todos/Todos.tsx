@@ -68,7 +68,7 @@ export class Todos extends React.Component<
               <span> left</span>
             </span>
             <TodosFilter
-              todoFilter={todoFilter}
+              currentTodoFilter={todoFilter}
               onShowActiveTodosClicked={showActiveTodos}
               onShowAllTodosClicked={showAllTodos}
               onShowCompletedTodosClicked={showCompletedTodos}

@@ -2,7 +2,7 @@ import React from "react";
 import { TodoFilter } from "../todos/todo-filter.model";
 
 interface TodosFilterProps {
-  todoFilter: TodoFilter;
+  currentTodoFilter: TodoFilter;
   onShowAllTodosClicked: () => void;
   onShowActiveTodosClicked: () => void;
   onShowCompletedTodosClicked: () => void;
@@ -46,6 +46,8 @@ export class TodosFilter extends React.Component<TodosFilterProps, {}> {
   }
 
   private getTodosFilterClassName = (elementTodoFilter: TodoFilter) => {
-    return this.props.todoFilter === elementTodoFilter ? "selected" : undefined;
+    return this.props.currentTodoFilter === elementTodoFilter
+      ? "selected"
+      : undefined;
   }
 }
