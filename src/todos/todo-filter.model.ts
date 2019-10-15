@@ -1,4 +1,4 @@
-export enum ViewModes {
+export enum TodoFilter {
   All,
   Active,
   Completed,

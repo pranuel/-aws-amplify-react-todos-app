@@ -1,0 +1,35 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TodosFilter should highlight the selected filter item 1`] = `
+<ul
+  className="filters"
+>
+  <li>
+    <a
+      href="#/"
+      onClick={[MockFunction]}
+    >
+      All
+    </a>
+  </li>
+  <span />
+  <li>
+    <a
+      className="selected"
+      href="#/"
+      onClick={[MockFunction]}
+    >
+      Active
+    </a>
+  </li>
+  <span />
+  <li>
+    <a
+      href="#/"
+      onClick={[MockFunction]}
+    >
+      Completed
+    </a>
+  </li>
+</ul>
+`;

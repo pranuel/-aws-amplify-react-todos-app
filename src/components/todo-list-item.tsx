@@ -1,8 +1,8 @@
 import React, { ChangeEvent } from "react";
 import { isEnterKey } from "../helpers/keyboard.helper";
-import { Todo } from "../todo.model";
+import { Todo } from "../todos/todo.model";
 
-interface TodoListItemProps {
+export interface TodoListItemProps {
   todo: Todo;
   editTodo?: Todo;
   onEditTodo: (todo: Todo) => void;
@@ -27,15 +27,21 @@ export class TodoListItem extends React.Component<TodoListItemProps, {}> {
           <input
             className="toggle"
             type="checkbox"
+            data-testid="is-done-toggle"
             checked={todo.isDone}
             onChange={this.onTodoIsDoneToggled}
           />
           <label>{todo.description}</label>
-          <button className="destroy" onClick={this.onDeleteTodoClicked} />
+          <button
+            className="destroy"
+            data-testid="delete-button"
+            onClick={this.onDeleteTodoClicked}
+          />
         </div>
         <input
           className="edit"
           value={!!editTodo ? editTodo.description : ""}
+          data-testid="edit-input"
           onKeyDown={this.onEditInputKeyDown}
           onBlur={this.onEditInputBlur}
           onChange={this.onEditInputChanged}
