@@ -19,7 +19,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "test-once": "npm run test -- --watchAll=false",
+    "test-pre-push": "npm run test -- --watchAll=false --bail",
     "coverage": "npm run test -- --coverage --watchAll=false"
   },
   "eslintConfig": {
@@ -54,7 +54,7 @@
   "husky": {
     "hooks": {
       "pre-commit": "lint-staged",
-      "pre-push": "npm run test-once"
+      "pre-push": "npm run test-pre-push"
     }
   },
   "lint-staged": {
