@@ -41,6 +41,7 @@ export class TodoListItem extends React.Component<TodoListItemProps, {}> {
         <input
           className="edit"
           value={!!editTodo ? editTodo.description : ""}
+          data-testid="edit-input"
           onKeyDown={this.onEditInputKeyDown}
           onBlur={this.onEditInputBlur}
           onChange={this.onEditInputChanged}

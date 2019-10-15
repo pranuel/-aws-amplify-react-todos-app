@@ -61,6 +61,7 @@ exports[`Todos should render correctly 1`] = `
           </div>
           <input
             className="edit"
+            data-testid="edit-input"
             onBlur={[Function]}
             onChange={[Function]}
             onKeyDown={[Function]}
@@ -92,6 +93,7 @@ exports[`Todos should render correctly 1`] = `
           </div>
           <input
             className="edit"
+            data-testid="edit-input"
             onBlur={[Function]}
             onChange={[Function]}
             onKeyDown={[Function]}

@@ -16,7 +16,7 @@ exports[`TodoListItem should mark an item as completed 1`] = `
       type="checkbox"
     />
     <label>
-      
+      foo
     </label>
     <button
       className="destroy"
@@ -26,6 +26,7 @@ exports[`TodoListItem should mark an item as completed 1`] = `
   </div>
   <input
     className="edit"
+    data-testid="edit-input"
     onBlur={[Function]}
     onChange={[Function]}
     onKeyDown={[Function]}
@@ -50,7 +51,7 @@ exports[`TodoListItem should mark an item as editing 1`] = `
       type="checkbox"
     />
     <label>
-      
+      foo
     </label>
     <button
       className="destroy"
@@ -60,10 +61,11 @@ exports[`TodoListItem should mark an item as editing 1`] = `
   </div>
   <input
     className="edit"
+    data-testid="edit-input"
     onBlur={[Function]}
     onChange={[Function]}
     onKeyDown={[Function]}
-    value=""
+    value="foo"
   />
 </li>
 `;

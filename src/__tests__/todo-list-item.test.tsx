@@ -2,14 +2,17 @@ import { fireEvent, render } from "@testing-library/react";
 import React from "react";
 import renderer from "react-test-renderer";
 import { TodoListItem, TodoListItemProps } from "../components/todo-list-item";
-import { Todo } from "../todos/todo.model";
 
 describe("TodoListItem", () => {
   let testProps: TodoListItemProps;
 
   beforeEach(() => {
     testProps = {
-      todo: new Todo(),
+      todo: {
+        description: "foo",
+        id: "1",
+        isDone: false,
+      },
       onEditTodo: jest.fn(),
       onTodoIsDoneToggled: jest.fn(),
       onSaveTodo: jest.fn(),
@@ -65,5 +68,48 @@ describe("TodoListItem", () => {
     fireEvent.doubleClick(getByText("foo todo"));
     // assert
     expect(onEditTodoSpy).toHaveBeenCalledWith(testProps.todo);
+  });
+
+  it("should notify about a todo is saved when enter key was hit", () => {
+    // arrange
+    testProps.editTodo = testProps.todo;
+    const onSaveTodoSpy = spyOn(testProps, "onSaveTodo");
+    const { getByTestId } = render(<TodoListItem {...testProps} />);
+    const enterKeyOptions = {
+      key: "Enter",
+      keyCode: 13,
+    };
+    // act
+    fireEvent.keyDown(getByTestId("edit-input"), enterKeyOptions);
+    // assert
+    expect(onSaveTodoSpy).toHaveBeenCalledWith(testProps.todo);
+  });
+
+  it("should notify about a todo is saved on input blur", () => {
+    // arrange
+    testProps.editTodo = testProps.todo;
+    const onSaveTodoSpy = spyOn(testProps, "onSaveTodo");
+    const { getByTestId } = render(<TodoListItem {...testProps} />);
+    // act
+    fireEvent.blur(getByTestId("edit-input"));
+    // assert
+    expect(onSaveTodoSpy).toHaveBeenCalledWith(testProps.todo);
+  });
+
+  it("should notify about todo edit changes on input change", () => {
+    // arrange
+    testProps.editTodo = testProps.todo;
+    const onEditingTodoDescriptionChangedSpy = spyOn(
+      testProps,
+      "onEditingTodoDescriptionChanged",
+    );
+    const { getByTestId } = render(<TodoListItem {...testProps} />);
+    // act
+    fireEvent.change(getByTestId("edit-input"), { target: { value: "bar" } });
+    // assert
+    expect(onEditingTodoDescriptionChangedSpy).toHaveBeenCalledWith(
+      testProps.todo,
+      "bar",
+    );
   });
 });
