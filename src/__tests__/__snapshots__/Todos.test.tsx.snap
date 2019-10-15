@@ -46,6 +46,7 @@ exports[`Todos should render correctly 1`] = `
             <input
               checked={false}
               className="toggle"
+              data-testid="is-done-toggle"
               onChange={[Function]}
               type="checkbox"
             />
@@ -54,6 +55,7 @@ exports[`Todos should render correctly 1`] = `
             </label>
             <button
               className="destroy"
+              data-testid="delete-button"
               onClick={[Function]}
             />
           </div>
@@ -75,6 +77,7 @@ exports[`Todos should render correctly 1`] = `
             <input
               checked={false}
               className="toggle"
+              data-testid="is-done-toggle"
               onChange={[Function]}
               type="checkbox"
             />
@@ -83,6 +86,7 @@ exports[`Todos should render correctly 1`] = `
             </label>
             <button
               className="destroy"
+              data-testid="delete-button"
               onClick={[Function]}
             />
           </div>

@@ -1,0 +1,69 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TodoListItem should mark an item as completed 1`] = `
+<li
+  className="completed"
+  onDoubleClick={[Function]}
+>
+  <div
+    className="view"
+  >
+    <input
+      checked={true}
+      className="toggle"
+      data-testid="is-done-toggle"
+      onChange={[Function]}
+      type="checkbox"
+    />
+    <label>
+      
+    </label>
+    <button
+      className="destroy"
+      data-testid="delete-button"
+      onClick={[Function]}
+    />
+  </div>
+  <input
+    className="edit"
+    onBlur={[Function]}
+    onChange={[Function]}
+    onKeyDown={[Function]}
+    value=""
+  />
+</li>
+`;
+
+exports[`TodoListItem should mark an item as editing 1`] = `
+<li
+  className="editing"
+  onDoubleClick={[Function]}
+>
+  <div
+    className="view"
+  >
+    <input
+      checked={false}
+      className="toggle"
+      data-testid="is-done-toggle"
+      onChange={[Function]}
+      type="checkbox"
+    />
+    <label>
+      
+    </label>
+    <button
+      className="destroy"
+      data-testid="delete-button"
+      onClick={[Function]}
+    />
+  </div>
+  <input
+    className="edit"
+    onBlur={[Function]}
+    onChange={[Function]}
+    onKeyDown={[Function]}
+    value=""
+  />
+</li>
+`;
