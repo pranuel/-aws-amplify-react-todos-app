@@ -62,7 +62,7 @@ export class Todos extends React.Component<
           </section>
           <footer className="footer">
             <span className="todo-count">
-              <strong>{itemsLeft}</strong>
+              <strong>{itemsLeft + " "}</strong>
               <span />
               <span>items</span>
               <span> left</span>
