@@ -109,7 +109,7 @@ exports[`Todos should render correctly 1`] = `
         className="todo-count"
       >
         <strong>
-          2
+          2 
         </strong>
         <span />
         <span>
